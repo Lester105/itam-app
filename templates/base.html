@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ITAM{% endblock %} | Asset Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-mark">IT</span>
+                <span class="brand-name">Asset Manager</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('list_assets') }}" class="sidebar-link {{ 'active' if request.endpoint in ['list_assets', 'view_asset'] else '' }}">
+                    Assets
+                </a>
+                <a href="{{ url_for('add_asset') }}" class="sidebar-link {{ 'active' if request.endpoint == 'add_asset' else '' }}">
+                    Add Asset
+                </a>
+            </nav>
+            <div class="sidebar-footer">Standalone build · v0.2</div>
+        </aside>
+
+        <main class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-stack">
+                        {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

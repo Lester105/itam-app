@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.serial }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>{{ asset.serial }}</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('edit_asset', asset_id=asset.id) }}" class="btn-primary">Edit</a>
+        <a href="{{ url_for('list_assets') }}" class="btn-secondary">Back to List</a>
+    </div>
+</div>
+
+{% for section_name, fields in sections %}
+<div class="detail-card">
+    <h2 class="detail-card-title">{{ section_name }}</h2>
+    <div class="detail-grid">
+        {% for field, label, required in fields %}
+        <div class="detail-item">
+            <span class="detail-label">{{ label }}</span>
+            <span class="detail-value">{{ asset[field] or '—' }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
