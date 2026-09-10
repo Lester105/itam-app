@@ -1,5 +1,9 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Edit Asset' if asset else 'Add Asset' }}{% endblock %}
+
+{% block title %}
+{{ 'Edit Asset' if asset else 'Add Asset' }}
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>{{ 'Edit Asset' if asset else 'Add Asset' }}</h1>
@@ -7,19 +11,55 @@
 
 <form method="POST" class="form-card form-card-wide">
     {% for section_name, fields in sections %}
-    <h2 class="form-section-title">{{ section_name }}</h2>
+    <h2 class="form-section-title">
+        {{ section_name }}
+    </h2>
+
     <div class="form-grid">
         {% for field, label, required in fields %}
         <div class="form-group">
-            <label>{{ label }}{% if required %} *{% endif %}</label>
+            <label>
+                {{ label }}
+                {% if required %}*{% endif %}
+            </label>
+
             {% if field == 'status' %}
             <select name="status">
-                {% for s in status_options %}
-                <option value="{{ s }}" {% if asset and asset['status'] == s %}selected{% endif %}>{{ s }}</option>
+                {% for status in status_options %}
+                <option
+                    value="{{ status }}"
+                    {% if asset and asset['status'] == status %}
+                    selected
+                    {% endif %}
+                >
+                    {{ status }}
+                </option>
                 {% endfor %}
             </select>
+
+            {% elif field == 'area' %}
+            <select name="area">
+                <option value="">Select a POD</option>
+
+                {% for area_option in area_options %}
+                <option
+                    value="{{ area_option }}"
+                    {% if asset and asset['area'] == area_option %}
+                    selected
+                    {% endif %}
+                >
+                    {{ area_option }}
+                </option>
+                {% endfor %}
+            </select>
+
             {% else %}
-            <input type="text" name="{{ field }}" value="{{ asset[field] if asset else '' }}" {% if required %}required{% endif %}>
+            <input
+                type="text"
+                name="{{ field }}"
+                value="{{ asset[field] if asset else '' }}"
+                {% if required %}required{% endif %}
+            >
             {% endif %}
         </div>
         {% endfor %}
@@ -27,8 +67,13 @@
     {% endfor %}
 
     <div class="form-actions">
-        <button type="submit" class="btn-primary">Save Asset</button>
-        <a href="{{ url_for('list_assets') }}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">
+            Save Asset
+        </button>
+
+        <a href="{{ url_for('list_assets') }}" class="btn-secondary">
+            Cancel
+        </a>
     </div>
 </form>
 {% endblock %}

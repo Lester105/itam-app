@@ -1,9 +1,14 @@
 {% extends "base.html" %}
+
 {% block title %}Assets{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <h1>IT Assets</h1>
-    <a href="{{ url_for('add_asset') }}" class="btn-primary">+ Add Asset</a>
+
+    <a href="{{ url_for('add_asset') }}" class="btn-primary">
+        + Add Asset
+    </a>
 </div>
 
 <div class="stat-row">
@@ -11,14 +16,17 @@
         <span class="stat-value">{{ total }}</span>
         <span class="stat-label">Total Assets</span>
     </div>
+
     <div class="stat-card">
         <span class="stat-value">{{ deployed }}</span>
         <span class="stat-label">Deployed</span>
     </div>
+
     <div class="stat-card">
         <span class="stat-value">{{ in_repair }}</span>
         <span class="stat-label">In Repair</span>
     </div>
+
     <div class="stat-card">
         <span class="stat-value">{{ retired }}</span>
         <span class="stat-label">Retired</span>
@@ -27,20 +35,52 @@
 
 <div class="toolbar">
     <form method="GET" class="filter-form">
-        <input type="text" name="search" placeholder="Search serial, user, hostname, tag..." value="{{ search }}">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search serial, user, hostname, tag..."
+            value="{{ search }}"
+        >
+
         <select name="status" onchange="this.form.submit()">
-            <option value="All" {% if current_status == 'All' %}selected{% endif %}>All Statuses</option>
-            {% for s in status_options %}
-            <option value="{{ s }}" {% if current_status == s %}selected{% endif %}>{{ s }}</option>
+            <option
+                value="All"
+                {% if current_status == 'All' %}selected{% endif %}
+            >
+                All Statuses
+            </option>
+
+            {% for status in status_options %}
+            <option
+                value="{{ status }}"
+                {% if current_status == status %}selected{% endif %}
+            >
+                {{ status }}
+            </option>
             {% endfor %}
         </select>
+
         <select name="site" onchange="this.form.submit()">
-            <option value="All" {% if current_site == 'All' %}selected{% endif %}>All Sites</option>
-            {% for s in sites %}
-            <option value="{{ s }}" {% if current_site == s %}selected{% endif %}>{{ s }}</option>
+            <option
+                value="All"
+                {% if current_site == 'All' %}selected{% endif %}
+            >
+                All Sites
+            </option>
+
+            {% for site in sites %}
+            <option
+                value="{{ site }}"
+                {% if current_site == site %}selected{% endif %}
+            >
+                {{ site }}
+            </option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn-secondary">Filter</button>
+
+        <button type="submit" class="btn-secondary">
+            Filter
+        </button>
     </form>
 </div>
 
@@ -51,38 +91,67 @@
             <th>Model</th>
             <th>User</th>
             <th>Location</th>
-            <th>Sub Location</th>
+            <th>POD Number / Station Number</th>
             <th>Site</th>
             <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
+
     <tbody>
         {% for asset in assets %}
         <tr>
-            <td><a href="{{ url_for('view_asset', asset_id=asset.id) }}">{{ asset.serial }}</a></td>
+            <td>
+                <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                    {{ asset.serial }}
+                </a>
+            </td>
+
             <td>{{ asset.model or '—' }}</td>
             <td>{{ asset.user or '—' }}</td>
             <td>{{ asset.location or '—' }}</td>
-            <td>{{ asset.sub_location or '—' }}</td>
+            <td>{{ asset.area or '—' }}</td>
             <td>{{ asset.site or '—' }}</td>
+
             <td>
                 {% if asset.status %}
-                <span class="status-badge status-{{ asset.status|lower|replace(' ', '-') }}">{{ asset.status }}</span>
+                <span class="status-badge status-{{ asset.status|lower|replace(' ', '-') }}">
+                    {{ asset.status }}
+                </span>
                 {% else %}
-                <span class="status-badge status-unknown">Unset</span>
+                <span class="status-badge status-unknown">
+                    Unset
+                </span>
                 {% endif %}
             </td>
+
             <td class="actions-cell">
-                <a href="{{ url_for('view_asset', asset_id=asset.id) }}">View</a>
-                <a href="{{ url_for('edit_asset', asset_id=asset.id) }}">Edit</a>
-                <form action="{{ url_for('delete_asset', asset_id=asset.id) }}" method="POST" onsubmit="return confirm('Delete this asset?');">
-                    <button type="submit" class="link-danger">Delete</button>
+                <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                    View
+                </a>
+
+                <a href="{{ url_for('edit_asset', asset_id=asset.id) }}">
+                    Edit
+                </a>
+
+                <form
+                    action="{{ url_for('delete_asset', asset_id=asset.id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Delete this asset?');"
+                >
+                    <button type="submit" class="link-danger">
+                        Delete
+                    </button>
                 </form>
             </td>
         </tr>
+
         {% else %}
-        <tr><td colspan="8" class="empty-row">No assets found.</td></tr>
+        <tr>
+            <td colspan="8" class="empty-row">
+                No assets found.
+            </td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
