@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import (
+    Flask, render_template, request, redirect, url_for, flash, make_response
+)
 import sqlite3
 import os
 
@@ -55,6 +57,40 @@ ALL_FIELDS = [
     field[0]
     for _, fields in FORM_SECTIONS
     for field in fields
+]
+
+# Assets page views: "general" is the original compact table,
+# "detailed" is the wide spreadsheet-style table with every field.
+VIEW_OPTIONS = ['general', 'detailed']
+DEFAULT_VIEW = 'general'
+VIEW_COOKIE = 'asset_view'
+
+DETAILED_COLUMNS = [
+    ('mac', 'MAC'),
+    ('model', 'Model'),
+    ('keyboard', 'Keyboard'),
+    ('mouse', 'Mouse'),
+    ('monitor_left', 'Monitor 1 (Left)'),
+    ('monitor_right', 'Monitor 2 (Right)'),
+    ('power_adapter', 'Power Adapter'),
+    ('vga', 'VGA'),
+    ('headset', 'Headset'),
+    ('location', 'Location'),
+    ('sub_location', 'Sub Location'),
+    ('sub_area', 'Sub Area'),
+    ('qeid', 'QEID'),
+    ('pein', 'PEIN'),
+    ('user', 'User'),
+    ('site', 'Site'),
+    ('po_number', 'PO Number'),
+    ('image', 'Image'),
+    ('hpdm_hostname', 'HPDM Hostname'),
+    ('tag_number', 'Tag Number'),
+    ('date_deployed', 'Date Deployed'),
+    ('date_returned', 'Date Returned'),
+    ('warranty_start', 'Warranty Start'),
+    ('warranty_end', 'Warranty End'),
+    ('status', 'Status'),
 ]
 
 
@@ -158,9 +194,23 @@ def list_assets():
 
     conn.close()
 
-    return render_template(
+    # Pick the view: an explicit ?view= wins, otherwise use the last one
+    # the person chose (stored in a cookie), otherwise the general view.
+    requested_view = request.args.get('view')
+    saved_view = request.cookies.get(VIEW_COOKIE)
+
+    if requested_view in VIEW_OPTIONS:
+        view = requested_view
+    elif saved_view in VIEW_OPTIONS:
+        view = saved_view
+    else:
+        view = DEFAULT_VIEW
+
+    response = make_response(render_template(
         'assets.html',
         assets=assets,
+        view=view,
+        detailed_columns=DETAILED_COLUMNS,
         total=total,
         deployed=deployed,
         in_repair=in_repair,
@@ -170,7 +220,17 @@ def list_assets():
         sites=sites,
         status_options=STATUS_OPTIONS,
         search=search or ''
-    )
+    ))
+
+    if requested_view in VIEW_OPTIONS:
+        response.set_cookie(
+            VIEW_COOKIE,
+            requested_view,
+            max_age=60 * 60 * 24 * 365,
+            samesite='Lax'
+        )
+
+    return response
 
 
 @app.route('/assets/<int:asset_id>')

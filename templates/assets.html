@@ -34,7 +34,26 @@
 </div>
 
 <div class="toolbar">
+    <div class="view-toggle" role="group" aria-label="Change view">
+        <a
+            href="{{ url_for('list_assets', search=search or None, status=current_status if current_status != 'All' else None, site=current_site if current_site != 'All' else None, view='general') }}"
+            class="view-toggle-option {{ 'active' if view == 'general' else '' }}"
+            {% if view == 'general' %}aria-current="true"{% endif %}
+        >
+            General view
+        </a>
+        <a
+            href="{{ url_for('list_assets', search=search or None, status=current_status if current_status != 'All' else None, site=current_site if current_site != 'All' else None, view='detailed') }}"
+            class="view-toggle-option {{ 'active' if view == 'detailed' else '' }}"
+            {% if view == 'detailed' %}aria-current="true"{% endif %}
+        >
+            Detailed view
+        </a>
+    </div>
+
     <form method="GET" class="filter-form">
+        <input type="hidden" name="view" value="{{ view }}">
+
         <input
             type="text"
             name="search"
@@ -84,6 +103,7 @@
     </form>
 </div>
 
+{% if view == 'general' %}
 <table class="data-table">
     <thead>
         <tr>
@@ -155,4 +175,79 @@
         {% endfor %}
     </tbody>
 </table>
+{% else %}
+<div class="table-scroll">
+    <table class="data-table data-table-detailed">
+        <thead>
+            <tr>
+                <th class="sticky-left sticky-left-1">POD location</th>
+                <th class="sticky-left sticky-left-2">Serial</th>
+                {% for field, label in detailed_columns %}
+                <th>{{ label }}</th>
+                {% endfor %}
+                <th class="sticky-right">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for asset in assets %}
+            <tr>
+                <td class="sticky-left sticky-left-1">{{ asset.area or '—' }}</td>
+
+                <td class="sticky-left sticky-left-2">
+                    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                        {{ asset.serial }}
+                    </a>
+                </td>
+
+                {% for field, label in detailed_columns %}
+                {% if field == 'status' %}
+                <td>
+                    {% if asset.status %}
+                    <span class="status-badge status-{{ asset.status|lower|replace(' ', '-') }}">
+                        {{ asset.status }}
+                    </span>
+                    {% else %}
+                    <span class="status-badge status-unknown">
+                        Unset
+                    </span>
+                    {% endif %}
+                </td>
+                {% else %}
+                <td>{{ asset[field] or '—' }}</td>
+                {% endif %}
+                {% endfor %}
+
+                <td class="actions-cell sticky-right">
+                    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                        View
+                    </a>
+
+                    <a href="{{ url_for('edit_asset', asset_id=asset.id) }}">
+                        Edit
+                    </a>
+
+                    <form
+                        action="{{ url_for('delete_asset', asset_id=asset.id) }}"
+                        method="POST"
+                        onsubmit="return confirm('Delete this asset?');"
+                    >
+                        <button type="submit" class="link-danger">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+
+            {% else %}
+            <tr>
+                <td colspan="{{ detailed_columns|length + 3 }}" class="empty-row">
+                    No assets found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
 {% endblock %}
